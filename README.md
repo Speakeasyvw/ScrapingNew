@@ -1,409 +1,457 @@
-# 🚀 Scraper de Tiendanube - Reclutamiento Focus Group
+# 🚀 Scraper de Tiendanube - Focus Group Recruiter
 
-Sistema automatizado para encontrar y contactar emprendedoras de Tiendanube en los sectores de moda y belleza.
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://TU-USUARIO-scraper-tiendanube.streamlit.app)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
----
-
-## 📋 Índice
-
-1. [Requisitos](#requisitos)
-2. [Instalación](#instalación)
-3. [Uso Rápido](#uso-rápido)
-4. [Guía Completa](#guía-completa)
-5. [Solución de Problemas](#solución-de-problemas)
-6. [FAQ](#faq)
+Sistema automatizado para identificar y extraer datos de contacto de emprendedoras de Tiendanube en los sectores de **moda y belleza** para reclutamiento de focus groups.
 
 ---
 
-## 🎯 ¿Qué hace este scraper?
+## 🎯 ¿Qué hace esta herramienta?
 
-- ✅ Busca tiendas de Tiendanube (moda y belleza)
-- ✅ Extrae Instagram, email, WhatsApp y Facebook
-- ✅ Clasifica por nicho automáticamente
-- ✅ Genera CSVs listos para outreach
-- ✅ Prioriza tiendas por calidad de datos
+Esta aplicación web permite:
 
-**Resultado esperado:** 100-150 tiendas con datos de contacto en 1-2 horas.
-
----
-
-## 💻 Requisitos
-
-### Sistema Operativo
-- ✅ Windows 10/11
-- ✅ macOS 10.14+
-- ✅ Linux (Ubuntu 18.04+)
-
-### Software Necesario
-- **Python 3.7 o superior** ([Descargar aquí](https://www.python.org/downloads/))
-- Conexión a Internet
-- 100 MB de espacio libre
-
-### Conocimientos Necesarios
-- ❌ NO necesitas saber programar
-- ✅ Saber abrir la terminal/cmd
-- ✅ Copiar y pegar comandos
+- ✅ **Extraer automáticamente** datos de contacto de tiendas Tiendanube
+- ✅ **Encontrar** Instagram, Email, WhatsApp y Facebook
+- ✅ **Clasificar** tiendas por nicho (Belleza, Moda, Joyería, etc.)
+- ✅ **Priorizar** contactos por calidad de datos (scoring automático)
+- ✅ **Exportar** CSVs listos para campañas de outreach
+- ✅ **Visualizar** estadísticas y métricas en tiempo real
 
 ---
 
-## 📥 Instalación
+## 🌐 Demo en Vivo
 
-### Paso 1: Descargar el Proyecto
+**🔗 [Abrir App](https://TU-USUARIO-scraper-tiendanube.streamlit.app)**
 
-**Opción A: Descarga ZIP**
+> **Nota:** Reemplaza `TU-USUARIO` con tu usuario de GitHub en el link de arriba
+
+---
+
+## 📊 Resultados Esperados
+
+| Métrica | Tasa de Éxito |
+|---------|---------------|
+| 📷 Instagram | 70-90% |
+| 📱 WhatsApp | 40-60% |
+| 📧 Email | 20-40% |
+| 👥 Facebook | 30-50% |
+
+**Ejemplo:** De 100 tiendas scrapeadas, obtendrás aproximadamente:
+- 80+ perfiles de Instagram
+- 50+ números de WhatsApp
+- 30+ emails
+- 40+ páginas de Facebook
+
+---
+
+## 🚀 Uso Rápido
+
+### Opción 1: Usar la App Online (Recomendado)
+
+1. **Abre el link:** https://TU-USUARIO-scraper-tiendanube.streamlit.app
+2. **Selecciona el modo:**
+   - 📝 Ingresar URLs manualmente
+   - 📂 Subir archivo .txt
+   - 🧪 Usar URLs de prueba (para testing)
+3. **Inicia el scraping:** Click en "🚀 Iniciar Scraping"
+4. **Descarga resultados:** Los CSVs se generan automáticamente
+
+⏱️ **Tiempo estimado:**
+- 10 tiendas: ~2 minutos
+- 50 tiendas: ~10 minutos
+- 100 tiendas: ~20 minutos
+
+### Opción 2: Ejecutar Localmente
+
 ```bash
-# 1. Click en "Code" → "Download ZIP"
-# 2. Descomprime el archivo
-# 3. Abre la carpeta en tu terminal
-```
-
-**Opción B: Git Clone**
-```bash
-git clone https://github.com/tuusuario/scraper-tiendanube.git
+# Clonar repositorio
+git clone https://github.com/TU-USUARIO/scraper-tiendanube.git
 cd scraper-tiendanube
-```
 
-### Paso 2: Instalar Dependencias
-
-**Windows:**
-```bash
-# Abre PowerShell o CMD en la carpeta del proyecto
-python -m pip install -r requirements.txt
-```
-
-**macOS/Linux:**
-```bash
-# Abre Terminal en la carpeta del proyecto
-python3 -m pip install -r requirements.txt
-```
-
-**Verificar instalación:**
-```bash
-python --version
-# Debe mostrar: Python 3.7.0 o superior
-```
-
----
-
-## 🚀 Uso Rápido (5 minutos)
-
-### Opción 1: Modo Testing (Para Probar)
-
-```bash
-# Ejecuta con tiendas de ejemplo
-python master_scraper.py 3
-```
-
-Resultado: Genera 3 archivos CSV con datos de 5 tiendas de prueba.
-
-### Opción 2: Modo Automático (Producción)
-
-```bash
-# 1. Crea archivo urls_input.txt con tus URLs:
-# (Una URL por línea)
-
-# 2. Ejecuta:
-python master_scraper.py 2
-
-# 3. Espera 10-30 minutos según cantidad de URLs
-```
-
-### Opción 3: Modo Interactivo (Guiado)
-
-```bash
-# Te guía paso a paso
-python master_scraper.py 1
-```
-
----
-
-## 📚 Guía Completa
-
-### 1. Preparar URLs de Entrada
-
-Crea un archivo `urls_input.txt` con URLs de Tiendanube:
-
-```
-https://beautymakeupok.mitiendanube.com
-https://cherrybomb9.mitiendanube.com
-https://kohphangan2.mitiendanube.com
-```
-
-**¿Cómo encontrar URLs?**
-
-Método A: Google Manual
-```
-1. Ve a Google
-2. Busca: site:mitiendanube.com moda mujer
-3. Copia las URLs que veas
-4. Pégalas en urls_input.txt
-```
-
-Método B: Script Extractor
-```bash
-python url_extractor.py
-# Sigue las instrucciones en pantalla
-```
-
-### 2. Ejecutar Scraper
-
-```bash
-python master_scraper.py 2
-```
-
-**Lo que verás en pantalla:**
-```
-🚀 Iniciando Master Scraper
-============================================================
-FASE 2: SCRAPING
-============================================================
-[1/100] https://tienda1.mitiendanube.com...
-    ✓ Instagram: ✓ | Email: ✗ | WhatsApp: ✓
-[2/100] https://tienda2.mitiendanube.com...
-    ✓ Instagram: ✓ | Email: ✓ | WhatsApp: ✓
-...
-```
-
-### 3. Revisar Resultados
-
-**Archivos generados:**
-```
-✅ tiendas_completo_YYYYMMDD_HHMMSS.csv    → Todos los datos
-✅ tiendas_top50_YYYYMMDD_HHMMSS.csv       → Top 50 mejores
-✅ tiendas_YYYYMMDD_HHMMSS.json            → Formato JSON
-✅ reporte_YYYYMMDD_HHMMSS.txt             → Resumen texto
-```
-
-**Abrir con:**
-- Excel / Google Sheets (CSV)
-- Notepad / VS Code (TXT)
-- Cualquier visor JSON (JSON)
-
-### 4. Validar y Enriquecer Datos
-
-```bash
-# Limpia y valida el CSV generado
-python validar_y_enriquecer.py
-
-# Ingresa el nombre del CSV cuando te lo pida
-```
-
----
-
-## 📊 Entendiendo los Resultados
-
-### Columnas del CSV
-
-| Columna | Descripción | Ejemplo |
-|---------|-------------|---------|
-| `url` | URL de la tienda | https://tienda.mitiendanube.com |
-| `nombre_tienda` | Nombre de la tienda | Beauty Make Up |
-| `nicho` | Categoría | Belleza - Maquillaje |
-| `instagram` | URL de Instagram | https://instagram.com/beautymakeup |
-| `email` | Email de contacto | contacto@tienda.com |
-| `whatsapp` | Número de WhatsApp | 5491112345678 |
-| `facebook` | URL de Facebook | https://facebook.com/tienda |
-| `score_contacto` | Calidad (0-8) | 5 |
-| `fecha_scraping` | Cuándo se scrapeó | 2025-10-24 16:46:43 |
-
-### Score de Contacto
-
-```
-8 puntos = Instagram + Email + WhatsApp + Facebook (Excelente)
-5 puntos = Instagram + WhatsApp (Muy bueno)
-3 puntos = Solo Instagram (Aceptable)
-0 puntos = Sin contactos (Descartar)
-```
-
-### Tasas de Éxito Esperadas
-
-```
-Instagram:  70-90% de las tiendas
-WhatsApp:   40-60% de las tiendas
-Email:      20-40% de las tiendas
-Facebook:   30-50% de las tiendas
-```
-
----
-
-## 🛠️ Solución de Problemas
-
-### Error: "Python no se reconoce"
-
-**Windows:**
-```bash
-# Reinstala Python desde:
-# https://www.python.org/downloads/
-# ✅ Marca: "Add Python to PATH"
-```
-
-**macOS:**
-```bash
-# Usa python3 en lugar de python:
-python3 master_scraper.py 3
-```
-
-### Error: "No module named 'requests'"
-
-```bash
-# Instala las dependencias:
+# Instalar dependencias
 pip install -r requirements.txt
 
-# Si no funciona:
-pip install requests beautifulsoup4 pandas lxml
+# Ejecutar app
+streamlit run app.py
 ```
 
-### Error: "Permission denied"
+La app se abrirá automáticamente en `http://localhost:8501`
 
-**Windows:**
-```bash
-# Ejecuta PowerShell como Administrador
-# Click derecho en PowerShell → "Ejecutar como administrador"
-```
+---
 
-**macOS/Linux:**
-```bash
-# Agrega permisos de ejecución:
-chmod +x master_scraper.py
-```
-
-### El scraper es muy lento
-
-```python
-# Edita master_scraper.py
-# Busca: time.sleep(2)
-# Cambia por: time.sleep(1)
-
-# ⚠️ Riesgo: Podrías ser bloqueado temporalmente
-```
-
-### No encuentra Instagram/Email
+## 📁 Estructura del Proyecto
 
 ```
-✓ Normal: Solo 70-90% tienen Instagram público
-✓ Solución: Usa Hunter.io para emails
-✓ Solución: Búsqueda manual en los perfiles
-```
-
-### "Google me bloqueó"
-
-```
-✓ Espera 24 horas
-✓ Usa VPN
-✓ Búsqueda manual (copia/pega URLs)
-✓ Usa SerpAPI (100 búsquedas gratis/mes)
+scraper-tiendanube/
+├── app.py                 # Aplicación principal Streamlit
+├── requirements.txt       # Dependencias Python
+├── README.md             # Esta documentación
+├── .gitignore            # Archivos ignorados por Git
+└── LICENSE               # Licencia MIT
 ```
 
 ---
 
-## 🎓 FAQ (Preguntas Frecuentes)
+## 🛠️ Tecnologías Utilizadas
 
-### ¿Cuántas tiendas puedo scrapear?
+- **[Streamlit](https://streamlit.io)** - Framework de UI
+- **[Beautiful Soup](https://www.crummy.com/software/BeautifulSoup/)** - Web scraping
+- **[Pandas](https://pandas.pydata.org/)** - Procesamiento de datos
+- **[Requests](https://requests.readthedocs.io/)** - HTTP requests
 
-- **Sin límite técnico**, pero recomendamos:
-- 50-100 para empezar
-- 150-200 para campaña completa
-- Respetar 2-3 segundos entre requests
+---
 
-### ¿Es legal hacer scraping?
+## 📋 Características
 
-- ✅ Scraping de datos públicos: Legal
-- ✅ Para investigación/análisis: Permitido
-- ❌ Spam/acoso: Prohibido
-- ❌ Venta de datos: Ilegal
+### ✨ Extracción de Datos
+- Nombre de la tienda
+- URL completa
+- Descripción (primeros 200 caracteres)
+- Nicho automático (10+ categorías)
+- Redes sociales (Instagram, Facebook)
+- Datos de contacto (Email, WhatsApp)
+- Score de calidad (0-8 puntos)
 
-**Recomendación:** Usa los datos solo para contacto legítimo (focus group).
+### 📊 Análisis y Visualización
+- Métricas en tiempo real
+- Gráficos por nicho
+- Distribución de scores
+- Filtros interactivos
+- Tablas ordenables
 
-### ¿Cuánto tarda?
+### 📥 Exportación
+- **CSV Completo:** Todos los datos
+- **CSV Top 50:** Las 50 mejores tiendas por score
+- Formato UTF-8 compatible con Excel
+- Nombres de archivo con timestamp
 
+---
+
+## 🎯 Sistema de Scoring
+
+Cada tienda recibe un **score de contacto** de 0 a 8 puntos:
+
+| Dato Encontrado | Puntos |
+|----------------|--------|
+| Instagram | +3 |
+| WhatsApp | +2 |
+| Email | +2 |
+| Facebook | +1 |
+
+**Ejemplo:**
+- Tienda con IG + WA + Email = 7 puntos ⭐⭐⭐
+- Tienda con solo IG = 3 puntos ⭐
+- Tienda sin contactos = 0 puntos (descartada)
+
+---
+
+## 📖 Guía de Uso Detallada
+
+### 1️⃣ Preparar tus URLs
+
+Tienes 3 opciones:
+
+**A) Ingresar manualmente**
 ```
-10 tiendas   = 1 minuto
-50 tiendas   = 5 minutos
-100 tiendas  = 15 minutos
-200 tiendas  = 30 minutos
+https://beautymakeup.mitiendanube.com
+https://modafashion.mitiendanube.com
+https://joyasarte.mitiendanube.com
 ```
 
-### ¿Funciona en otros países?
-
-✅ Sí, Tiendanube opera en:
-- Argentina
-- México
-- Brasil (como Nuvemshop)
-- Colombia
-- Chile
-
-Ajusta las búsquedas según el país.
-
-### ¿Puedo scrapear otros e-commerce?
-
-❌ Este scraper es específico para Tiendanube (`.mitiendanube.com`)
-
-Para otros:
-- Shopify → Necesita adaptación
-- WooCommerce → Necesita adaptación
-- MercadoShops → Necesita adaptación
-
-### ¿Necesito pagar algo?
-
+**B) Crear archivo .txt**
 ```
-Scraper:        GRATIS ✅
-Python:         GRATIS ✅
-Hunter.io:      $49/mes (opcional)
-SerpAPI:        $50/mes (opcional)
+# urls_input.txt
+https://tienda1.mitiendanube.com
+https://tienda2.mitiendanube.com
+https://tienda3.mitiendanube.com
 ```
 
-**Total mínimo:** $0 (todo funciona gratis)
+**C) Usar URLs de prueba**
+- La app incluye 5 URLs reales para testing
+
+### 2️⃣ Configurar Scraping
+
+En la barra lateral puedes ver:
+- Modo de ingreso seleccionado
+- Estadísticas esperadas
+- Información de la app
+
+### 3️⃣ Ejecutar y Monitorear
+
+Durante el scraping verás:
+- Barra de progreso
+- Tienda actual siendo procesada
+- Resultados en tiempo real:
+  - ✓ = Dato encontrado
+  - ✗ = Dato no encontrado
+
+### 4️⃣ Analizar Resultados
+
+Después del scraping verás:
+- **Métricas:** Total, con IG, con email, con WA
+- **Gráficos:** Distribución por nicho y score
+- **Tabla:** Datos completos con filtros
+
+### 5️⃣ Exportar Datos
+
+Descarga los CSVs:
+- **Completo:** Para análisis exhaustivo
+- **Top 50:** Para priorizar outreach
+
+---
+
+## 🔍 Nichos Detectados Automáticamente
+
+La app clasifica las tiendas en:
+
+- 💄 **Belleza - Maquillaje:** Cosméticos, labiales, sombras
+- 🧴 **Belleza - Skincare:** Cremas, serums, faciales
+- 💎 **Joyería:** Oro, plata, anillos, collares
+- ✨ **Bijouterie:** Accesorios de fantasía
+- 👗 **Moda - Ropa:** Vestidos, blusas, indumentaria
+- 👜 **Accesorios:** Carteras, bolsos, cinturones
+- 🎁 **Otro:** Categorías no especificadas
+
+---
+
+## ⚙️ Configuración Avanzada
+
+### Ajustar Velocidad de Scraping
+
+Edita `app.py` línea 48:
+
+```python
+# Más lento pero más seguro (menos riesgo de bloqueo)
+time.sleep(2.0)
+
+# Más rápido pero mayor riesgo
+time.sleep(0.8)
+
+# Balance recomendado
+time.sleep(1.5)  # Default
+```
+
+### Cambiar Timeout de Requests
+
+Línea 35:
+
+```python
+response = self.session.get(url, timeout=15)  # 15 segundos
+```
+
+---
+
+## 🚨 Limitaciones y Consideraciones
+
+### Técnicas
+- ❌ No funciona con tiendas que requieren login
+- ❌ JavaScript pesado puede no cargar completamente
+- ⚠️ Rate limiting: 2 segundos entre requests
+- ⚠️ Timeout: 15 segundos por tienda
+
+### Legales
+- ✅ Solo datos públicos disponibles en web
+- ✅ Respeta `robots.txt` de Tiendanube
+- ❌ No usar para spam o acoso
+- ❌ No revender datos personales
+
+### Éticas
+- 🎯 Uso exclusivo para research/focus groups
+- 🤝 Contacto respetuoso y transparente
+- 📧 Ofrecer opt-out en comunicaciones
+- 🛡️ Proteger privacidad de datos
+
+---
+
+## 📈 Roadmap y Mejoras Futuras
+
+- [ ] Soporte para Selenium (tiendas con JS)
+- [ ] Integración con Hunter.io API (emails)
+- [ ] Verificación de Instagram (seguidores, actividad)
+- [ ] Export a Google Sheets
+- [ ] Búsqueda integrada en Google
+- [ ] Detección de duplicados inteligente
+- [ ] Histórico de scraping
+- [ ] Autenticación de usuarios
+- [ ] Scheduler para scraping automático
+- [ ] API REST
+
+---
+
+## 🤝 Contribuir
+
+¿Quieres mejorar el scraper? ¡Contribuciones son bienvenidas!
+
+1. Fork el proyecto
+2. Crea tu rama: `git checkout -b feature/nueva-funcionalidad`
+3. Commit cambios: `git commit -m 'Agrega nueva funcionalidad'`
+4. Push a la rama: `git push origin feature/nueva-funcionalidad`
+5. Abre un Pull Request
+
+---
+
+## 🐛 Reportar Bugs
+
+Si encuentras un error:
+
+1. Ve a [Issues](https://github.com/TU-USUARIO/scraper-tiendanube/issues)
+2. Crea un nuevo issue
+3. Incluye:
+   - Descripción del error
+   - Pasos para reproducir
+   - Screenshots (si aplica)
+   - Sistema operativo y versión de Python
 
 ---
 
 ## 📞 Soporte
 
-### Reportar un Bug
-
-```bash
-# Incluye en tu reporte:
-1. Sistema operativo
-2. Versión de Python (python --version)
-3. Mensaje de error completo
-4. Pasos para reproducir
-```
-
-### Solicitar Ayuda
-
-```bash
-# Antes de preguntar:
-1. Lee el README completo
-2. Revisa "Solución de Problemas"
-3. Busca en FAQ
-```
+- 📧 **Email:** tu-email@ejemplo.com
+- 💬 **GitHub Issues:** [Abrir issue](https://github.com/TU-USUARIO/scraper-tiendanube/issues)
+- 📱 **WhatsApp:** +54 9 11 XXXX-XXXX
 
 ---
 
 ## 📄 Licencia
 
-MIT License - Uso libre para proyectos personales y comerciales.
+Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para más detalles.
 
----
-
-## 🙏 Créditos
-
-Desarrollado para reclutamiento de focus groups en el sector e-commerce.
-
-**Autor:** [Tu Nombre]  
-**Versión:** 1.0.0  
-**Última actualización:** Octubre 2025
-
----
-
-## 🚀 Próximos Pasos
-
-1. ✅ Completar scraping de 100-150 tiendas
-2. ✅ Enriquecer emails con Hunter.io
-3. ✅ Verificar Instagrams manualmente
-4. ✅ Crear templates de outreach
-5. ✅ Iniciar campaña de contacto
-
-**¿Listo para comenzar? Ejecuta:**
-```bash
-python master_scraper.py 1
 ```
+MIT License
+
+Copyright (c) 2025 [Tu Nombre]
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+---
+
+## 🌟 Reconocimientos
+
+Desarrollado para facilitar el reclutamiento de focus groups en el ecosistema de e-commerce latinoamericano.
+
+**Tecnologías de código abierto utilizadas:**
+- Streamlit Community Cloud
+- Beautiful Soup
+- Pandas
+- Python
+
+---
+
+## 📊 Estadísticas del Proyecto
+
+![GitHub stars](https://img.shields.io/github/stars/TU-USUARIO/scraper-tiendanube?style=social)
+![GitHub forks](https://img.shields.io/github/forks/TU-USUARIO/scraper-tiendanube?style=social)
+![GitHub issues](https://img.shields.io/github/issues/TU-USUARIO/scraper-tiendanube)
+![GitHub last commit](https://img.shields.io/github/last-commit/TU-USUARIO/scraper-tiendanube)
+
+---
+
+## 🎓 Casos de Uso
+
+### Research y Academia
+- Estudios de mercado en e-commerce
+- Análisis de emprendedoras digitales
+- Investigación de ecosistemas startup
+
+### Reclutamiento
+- Focus groups de productos
+- User research para apps
+- Beta testers de herramientas
+
+### Marketing
+- Base de datos para outreach
+- Identificación de influencers
+- Análisis de competencia
+
+---
+
+## ✅ Checklist de Setup
+
+Para nuevos usuarios:
+
+- [ ] Python 3.8+ instalado
+- [ ] Git instalado (opcional)
+- [ ] Cuenta de GitHub creada
+- [ ] Repositorio clonado/forked
+- [ ] Dependencias instaladas
+- [ ] App probada localmente
+- [ ] Deploy en Streamlit Cloud completado
+- [ ] URL personalizada configurada
+- [ ] README personalizado con tu info
+
+---
+
+## 🚀 Deploy Rápido
+
+```bash
+# 1 minuto setup
+git clone https://github.com/TU-USUARIO/scraper-tiendanube.git
+cd scraper-tiendanube
+pip install -r requirements.txt
+streamlit run app.py
+
+# Deploy en cloud: https://share.streamlit.io
+# Connect GitHub → Select repo → Deploy!
+```
+
+---
+
+## 💡 Tips y Trucos
+
+### Mejorar Tasa de Éxito de Emails
+1. Usar Hunter.io después del scraping
+2. Buscar en bio de Instagram
+3. Revisar página de contacto manualmente
+
+### Optimizar Velocidad
+- Scrapear en lotes de 50-100
+- Usar URLs de alta calidad
+- Filtrar por nicho antes de scrapear
+
+### Mantener Datos Actualizados
+- Re-scrapear cada 2-3 meses
+- Verificar Instagrams activos
+- Validar emails periódicamente
+
+---
+
+## 📚 Documentación Adicional
+
+- [Guía de Deployment](DEPLOYMENT.md)
+- [Quick Start Guide](QUICK_START.md)
+- [Troubleshooting](TROUBLESHOOTING.md)
+
+---
+
+## 🎉 ¡Empecemos!
+
+**👉 [Abrir App en Streamlit](https://TU-USUARIO-scraper-tiendanube.streamlit.app)**
+
+---
+
+<div align="center">
+
+**Hecho con ❤️ para la comunidad de e-commerce**
+
+⭐ Si te fue útil, deja una estrella en el repo
+
+</div>
