@@ -23,9 +23,8 @@ Esta aplicación web permite:
 
 ## 🌐 Demo en Vivo
 
-**🔗 [Abrir App](https://TU-USUARIO-scraper-tiendanube.streamlit.app)**
+**🔗 [Abrir App](https://scrapingnew.streamlit.app/)**
 
-> **Nota:** Reemplaza `TU-USUARIO` con tu usuario de GitHub en el link de arriba
 
 ---
 
@@ -50,7 +49,7 @@ Esta aplicación web permite:
 
 ### Opción 1: Usar la App Online (Recomendado)
 
-1. **Abre el link:** https://TU-USUARIO-scraper-tiendanube.streamlit.app
+1. **Abre el link:** https://scrapingnew.streamlit.app/
 2. **Selecciona el modo:**
    - 📝 Ingresar URLs manualmente
    - 📂 Subir archivo .txt
@@ -296,7 +295,7 @@ response = self.session.get(url, timeout=15)  # 15 segundos
 
 Si encuentras un error:
 
-1. Ve a [Issues](https://github.com/TU-USUARIO/scraper-tiendanube/issues)
+1. Ve a [Issues](https://github.com/speakeasyvw/ScrapingNew/issues)
 2. Crea un nuevo issue
 3. Incluye:
    - Descripción del error
@@ -308,9 +307,8 @@ Si encuentras un error:
 
 ## 📞 Soporte
 
-- 📧 **Email:** tu-email@ejemplo.com
-- 💬 **GitHub Issues:** [Abrir issue](https://github.com/TU-USUARIO/scraper-tiendanube/issues)
-- 📱 **WhatsApp:** +54 9 11 XXXX-XXXX
+- 📧 **Email:** duartedeveloping@gmail.com
+- 💬 **GitHub Issues:** [Abrir issue](https://github.com/speakeasyvw/ScrapingNew/issues)
 
 ---
 
@@ -321,7 +319,7 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 ```
 MIT License
 
-Copyright (c) 2025 [Tu Nombre]
+Copyright (c) 2025 Giovanni Duarte
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -358,10 +356,10 @@ Desarrollado para facilitar el reclutamiento de focus groups en el ecosistema de
 
 ## 📊 Estadísticas del Proyecto
 
-![GitHub stars](https://img.shields.io/github/stars/TU-USUARIO/scraper-tiendanube?style=social)
-![GitHub forks](https://img.shields.io/github/forks/TU-USUARIO/scraper-tiendanube?style=social)
-![GitHub issues](https://img.shields.io/github/issues/TU-USUARIO/scraper-tiendanube)
-![GitHub last commit](https://img.shields.io/github/last-commit/TU-USUARIO/scraper-tiendanube)
+![GitHub stars](https://img.shields.io/github/stars/Speakeasyvw/ScrapingNew?style=social)
+![GitHub forks](https://img.shields.io/github/forks/Speakeasyvw/ScrapingNew?style=social)
+![GitHub issues](https://img.shields.io/github/issues/Speakeasyvw/ScrapingNew)
+![GitHub last commit](https://img.shields.io/github/last-commit/Speakeasyvw/ScrapingNew)
 
 ---
 
@@ -404,8 +402,8 @@ Para nuevos usuarios:
 
 ```bash
 # 1 minuto setup
-git clone https://github.com/TU-USUARIO/scraper-tiendanube.git
-cd scraper-tiendanube
+git clone https://github.com/Speakeasyvw/ScrapingNew.git
+cd ScrapingNew
 pip install -r requirements.txt
 streamlit run app.py
 
@@ -434,17 +432,9 @@ streamlit run app.py
 
 ---
 
-## 📚 Documentación Adicional
-
-- [Guía de Deployment](DEPLOYMENT.md)
-- [Quick Start Guide](QUICK_START.md)
-- [Troubleshooting](TROUBLESHOOTING.md)
-
----
-
 ## 🎉 ¡Empecemos!
 
-**👉 [Abrir App en Streamlit](https://TU-USUARIO-scraper-tiendanube.streamlit.app)**
+**👉 [Abrir App en Streamlit](https://scrapingnew.streamlit.app/)**
 
 ---
 
