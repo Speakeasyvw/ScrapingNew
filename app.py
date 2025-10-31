@@ -11,6 +11,7 @@ import time
 import re
 from datetime import datetime
 import io
+import json
 
 # Configuración de página
 st.set_page_config(
@@ -27,6 +28,151 @@ st.markdown("""
     .stProgress > div > div > div > div {background-color: #4CAF50;}
     </style>
     """, unsafe_allow_html=True)
+
+# Clase para buscar URLs
+class URLSearcher:
+    """Busca URLs de Tiendanube usando diferentes métodos"""
+    
+    def __init__(self):
+        self.headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+    
+    def search_with_serper(self, query, num_results=10, api_key=None):
+        """Busca usando Serper API (https://serper.dev) - RECOMENDADO"""
+        if not api_key:
+            return None, "Se requiere API key de Serper"
+        
+        try:
+            all_urls = []
+            max_per_request = 10  # Serper limita a 10 por request
+            num_requests = (num_results + max_per_request - 1) // max_per_request  # Redondeo hacia arriba
+            
+            for page in range(num_requests):
+                url = "https://google.serper.dev/search"
+                payload = json.dumps({
+                    "q": query,
+                    "num": min(max_per_request, num_results - len(all_urls)),
+                    "page": page + 1  # Página actual
+                })
+                headers = {
+                    'X-API-KEY': api_key,
+                    'Content-Type': 'application/json'
+                }
+                
+                response = requests.post(url, headers=headers, data=payload, timeout=10)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    
+                    # Extraer URLs orgánicas
+                    if 'organic' in data:
+                        for result in data['organic']:
+                            url_found = result.get('link', '')
+                            if 'mitiendanube.com' in url_found and url_found not in all_urls:
+                                all_urls.append(url_found)
+                                
+                                # Si ya tenemos suficientes, salir
+                                if len(all_urls) >= num_results:
+                                    return all_urls, None
+                    
+                    # Si no hay más resultados, salir
+                    if not data.get('organic'):
+                        break
+                    
+                    # Pequeña pausa entre requests
+                    if page < num_requests - 1:
+                        time.sleep(0.5)
+                else:
+                    # Si falla en la primera página, retornar error
+                    if page == 0:
+                        return None, f"Error API: {response.status_code}"
+                    # Si falla en páginas siguientes, retornar lo que tenemos
+                    break
+            
+            if all_urls:
+                return all_urls, None
+            else:
+                return None, "No se encontraron URLs"
+                
+        except Exception as e:
+            return None, f"Error: {str(e)}"
+    
+    def search_with_serpapi(self, query, num_results=10, api_key=None):
+        """Busca usando SerpAPI (https://serpapi.com)"""
+        if not api_key:
+            return None, "Se requiere API key de SerpAPI"
+        
+        try:
+            all_urls = []
+            max_per_request = 10
+            num_requests = (num_results + max_per_request - 1) // max_per_request
+            
+            for page in range(num_requests):
+                params = {
+                    'q': query,
+                    'api_key': api_key,
+                    'num': min(max_per_request, num_results - len(all_urls)),
+                    'start': page * max_per_request,
+                    'engine': 'google'
+                }
+                
+                response = requests.get('https://serpapi.com/search', params=params, timeout=10)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    
+                    if 'organic_results' in data:
+                        for result in data['organic_results']:
+                            url_found = result.get('link', '')
+                            if 'mitiendanube.com' in url_found and url_found not in all_urls:
+                                all_urls.append(url_found)
+                                
+                                if len(all_urls) >= num_results:
+                                    return all_urls, None
+                    
+                    if not data.get('organic_results'):
+                        break
+                    
+                    if page < num_requests - 1:
+                        time.sleep(0.5)
+                else:
+                    if page == 0:
+                        return None, f"Error API: {response.status_code}"
+                    break
+            
+            if all_urls:
+                return all_urls, None
+            else:
+                return None, "No se encontraron URLs"
+                
+        except Exception as e:
+            return None, f"Error: {str(e)}"
+    
+    def search_with_duckduckgo(self, query, num_results=10):
+        """Busca usando DuckDuckGo (sin API, menos confiable pero gratis)"""
+        try:
+            from duckduckgo_search import DDGS
+            
+            urls = []
+            with DDGS() as ddgs:
+                results = ddgs.text(query, max_results=num_results)
+                for result in results:
+                    url = result.get('href', '')
+                    if 'mitiendanube.com' in url:
+                        urls.append(url)
+            
+            return urls, None
+            
+        except ImportError:
+            return None, "Instalar: pip install duckduckgo-search"
+        except Exception as e:
+            return None, f"Error: {str(e)}"
+    
+    def validate_tiendanube_url(self, url):
+        """Valida que sea una URL válida de Tiendanube"""
+        pattern = r'https?://[a-zA-Z0-9-]+\.mitiendanube\.com/?'
+        return bool(re.match(pattern, url))
 
 # Clase Scraper
 class TiendaNubeScraper:
@@ -150,8 +296,27 @@ def main():
         
         modo = st.radio(
             "Selecciona modo:",
-            ["📝 Ingresar URLs manualmente", "📂 Subir archivo .txt", "🧪 Usar URLs de prueba"]
+            ["🔍 Buscar URLs en Google", "📝 Ingresar URLs manualmente", "📂 Subir archivo .txt", "🧪 Usar URLs de prueba"]
         )
+        
+        # Configuración de búsqueda
+        if modo == "🔍 Buscar URLs en Google":
+            st.markdown("---")
+            st.markdown("### 🔑 API Configuration")
+            
+            api_service = st.selectbox(
+                "Servicio:",
+                ["Serper (Recomendado)", "SerpAPI", "DuckDuckGo (Gratis, limitado)"],
+                help="Serper: 10 resultados por búsqueda | SerpAPI: Hasta 100 por búsqueda | DuckDuckGo: Gratis pero limitado"
+            )
+            
+            api_key = None
+            if api_service != "DuckDuckGo (Gratis, limitado)":
+                api_key = st.text_input(
+                    "API Key:",
+                    type="password",
+                    help=f"Obtén tu clave en: {'https://serper.dev' if 'Serper' in api_service else 'https://serpapi.com'}"
+                )
         
         st.markdown("---")
         st.markdown("### 📊 Estadísticas esperadas")
@@ -159,13 +324,88 @@ def main():
         
         st.markdown("---")
         st.markdown("### ℹ️ Información")
-        st.markdown("**Versión:** 1.0.0")
+        st.markdown("**Versión:** 2.0.0")
         st.markdown("**Autor:** Growth Team")
     
     # Main content
     urls_a_procesar = []
     
-    if modo == "📝 Ingresar URLs manualmente":
+    if modo == "🔍 Buscar URLs en Google":
+        st.markdown("### 🔍 Búsqueda de URLs")
+        
+        col1, col2 = st.columns([3, 1])
+        
+        with col1:
+            search_query = st.text_input(
+                "Consulta de búsqueda:",
+                value="site:mitiendanube.com moda mujer",
+                help="Usa 'site:mitiendanube.com' seguido de palabras clave"
+            )
+        
+        with col2:
+            num_results = st.number_input(
+                "Cantidad de URLs:",
+                min_value=5,
+                max_value=100,
+                value=20,
+                step=5
+            )
+        
+        st.markdown("**💡 Ejemplos de búsqueda:**")
+        ejemplos = st.expander("Ver ejemplos")
+        with ejemplos:
+            st.code("site:mitiendanube.com moda mujer")
+            st.code("site:mitiendanube.com joyería artesanal")
+            st.code("site:mitiendanube.com maquillaje belleza")
+            st.code("site:mitiendanube.com accesorios colombia")
+        
+        if st.button("🔎 Buscar URLs", type="primary"):
+            if not search_query:
+                st.error("❌ Ingresa una consulta de búsqueda")
+            elif api_service != "DuckDuckGo (Gratis, limitado)" and not api_key:
+                st.error("❌ Ingresa tu API Key")
+            else:
+                with st.spinner(f"🔍 Buscando URLs con {api_service}..."):
+                    searcher = URLSearcher()
+                    
+                    # Mostrar progreso
+                    progress_text = st.empty()
+                    
+                    # Seleccionar método de búsqueda
+                    if api_service == "Serper (Recomendado)":
+                        progress_text.text(f"🔍 Buscando en Google... (puede tardar unos segundos para {num_results} URLs)")
+                        urls, error = searcher.search_with_serper(search_query, num_results, api_key)
+                    elif api_service == "SerpAPI":
+                        progress_text.text(f"🔍 Buscando en Google... (puede tardar unos segundos para {num_results} URLs)")
+                        urls, error = searcher.search_with_serpapi(search_query, num_results, api_key)
+                    else:
+                        progress_text.text("🔍 Buscando con DuckDuckGo...")
+                        urls, error = searcher.search_with_duckduckgo(search_query, num_results)
+                    
+                    progress_text.empty()
+                    
+                    if error:
+                        st.error(f"❌ {error}")
+                    elif urls:
+                        urls_a_procesar = list(set(urls))  # Eliminar duplicados
+                        st.success(f"✅ Se encontraron {len(urls_a_procesar)} URLs únicas")
+                        
+                        # Guardar en session state
+                        st.session_state['urls_encontradas'] = urls_a_procesar
+                        st.session_state['search_query'] = search_query
+                        
+                        with st.expander("🔗 Ver URLs encontradas"):
+                            for i, url in enumerate(urls_a_procesar, 1):
+                                st.text(f"{i}. {url}")
+                    else:
+                        st.warning("⚠️ No se encontraron URLs con esa búsqueda. Intenta con otras palabras clave.")
+        
+        # Usar URLs guardadas
+        if 'urls_encontradas' in st.session_state:
+            urls_a_procesar = st.session_state['urls_encontradas']
+            st.info(f"📦 {len(urls_a_procesar)} URLs listas para scrapear (búsqueda: '{st.session_state.get('search_query', '')}')")
+    
+    elif modo == "📝 Ingresar URLs manualmente":
         st.markdown("### 📝 Ingresa las URLs")
         st.markdown("Una URL por línea (ejemplo: `https://tienda.mitiendanube.com`)")
         
