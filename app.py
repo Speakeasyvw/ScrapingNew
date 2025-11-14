@@ -29,6 +29,64 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
+# Configuración de búsquedas
+SEARCH_PROFILES = {
+    "General": [],
+    "Moda y accesorios": ["moda", "indumentaria", "accesorios"],
+    "Belleza y cuidado personal": ["belleza", "maquillaje", "cosmetica"],
+    "Hogar y decoracion": ["hogar", "decoracion", "muebles"],
+    "Electronica y tecnologia": ["electronica", "tecnologia", "gadgets"],
+    "Salud y bienestar": ["salud", "bienestar", "fitness"],
+    "Mascotas": ["mascotas", "petshop", "accesorios para perros"],
+    "Infantil y bebes": ["bebe", "ninos", "juguetes"]
+}
+
+COUNTRY_FILTERS = {
+    "Todos": "",
+    "Argentina": "Argentina",
+    "Chile": "Chile",
+    "Colombia": "Colombia",
+    "Mexico": "Mexico",
+    "Peru": "Peru",
+    "Uruguay": "Uruguay",
+    "Espana": "Espana",
+    "Estados Unidos": "\"Estados Unidos\""
+}
+
+
+def normalize_domain(raw_domain: str) -> str:
+    """Normaliza el dominio para utilizarlo en el operador site: y como filtro."""
+    if not raw_domain:
+        return "mitiendanube.com"
+    cleaned = raw_domain.lower().strip()
+    for prefix in ("site:", "https://", "http://"):
+        cleaned = cleaned.replace(prefix, "")
+    cleaned = cleaned.strip().strip('/')
+    return cleaned or "mitiendanube.com"
+
+
+def build_search_query(domain, profile, country, extra_keywords="", custom_query=""):
+    """Construye la consulta final y retorna también el dominio normalizado."""
+    normalized_domain = normalize_domain(domain)
+    if custom_query and custom_query.strip():
+        return custom_query.strip(), normalized_domain
+    query_terms = list(SEARCH_PROFILES.get(profile, []))
+    if extra_keywords:
+        parts = [kw.strip() for kw in re.split(r',|;', extra_keywords) if kw.strip()]
+        if parts:
+            query_terms.extend(parts)
+        else:
+            query_terms.append(extra_keywords.strip())
+    country_term = COUNTRY_FILTERS.get(country, "")
+    if country_term:
+        query_terms.append(country_term)
+    keywords = " ".join(query_terms).strip()
+    base = f"site:{normalized_domain}"
+    if keywords:
+        base = f"{base} {keywords}"
+    return base.strip(), normalized_domain
+
+
 # Clase para buscar URLs
 class URLSearcher:
     """Busca URLs de Tiendanube usando diferentes métodos"""
@@ -38,7 +96,12 @@ class URLSearcher:
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
     
-    def search_with_serper(self, query, num_results=10, api_key=None):
+    def _matches_domain(self, url, domain_filter):
+        if not domain_filter:
+            return True
+        return domain_filter.lower() in url.lower()
+    
+    def search_with_serper(self, query, num_results=10, api_key=None, domain_filter=None):
         """Busca usando Serper API (https://serper.dev) - RECOMENDADO"""
         if not api_key:
             return None, "Se requiere API key de Serper"
@@ -69,7 +132,7 @@ class URLSearcher:
                     if 'organic' in data:
                         for result in data['organic']:
                             url_found = result.get('link', '')
-                            if 'mitiendanube.com' in url_found and url_found not in all_urls:
+                            if self._matches_domain(url_found, domain_filter) and url_found not in all_urls:
                                 all_urls.append(url_found)
                                 
                                 # Si ya tenemos suficientes, salir
@@ -98,7 +161,7 @@ class URLSearcher:
         except Exception as e:
             return None, f"Error: {str(e)}"
     
-    def search_with_serpapi(self, query, num_results=10, api_key=None):
+    def search_with_serpapi(self, query, num_results=10, api_key=None, domain_filter=None):
         """Busca usando SerpAPI (https://serpapi.com)"""
         if not api_key:
             return None, "Se requiere API key de SerpAPI"
@@ -125,7 +188,7 @@ class URLSearcher:
                     if 'organic_results' in data:
                         for result in data['organic_results']:
                             url_found = result.get('link', '')
-                            if 'mitiendanube.com' in url_found and url_found not in all_urls:
+                            if self._matches_domain(url_found, domain_filter) and url_found not in all_urls:
                                 all_urls.append(url_found)
                                 
                                 if len(all_urls) >= num_results:
@@ -149,7 +212,7 @@ class URLSearcher:
         except Exception as e:
             return None, f"Error: {str(e)}"
     
-    def search_with_duckduckgo(self, query, num_results=10):
+    def search_with_duckduckgo(self, query, num_results=10, domain_filter=None):
         """Busca usando DuckDuckGo (sin API, menos confiable pero gratis)"""
         try:
             from duckduckgo_search import DDGS
@@ -159,7 +222,7 @@ class URLSearcher:
                 results = ddgs.text(query, max_results=num_results)
                 for result in results:
                     url = result.get('href', '')
-                    if 'mitiendanube.com' in url:
+                    if self._matches_domain(url, domain_filter):
                         urls.append(url)
             
             return urls, None
@@ -286,7 +349,7 @@ def main():
     
     # Header
     st.title("🚀 Scraper de Tiendanube")
-    st.markdown("### Encuentra y extrae datos de contacto de tiendas de moda y belleza")
+    st.markdown("### Encuentra y extrae datos de contacto de tiendas online del dominio que elijas")
     st.markdown("---")
     
     # Sidebar
@@ -332,37 +395,69 @@ def main():
     
     if modo == "🔍 Buscar URLs en Google":
         st.markdown("### 🔍 Búsqueda de URLs")
+        st.markdown("Configura el dominio, el país y el tipo de negocio para generar la consulta automáticamente.")
         
         col1, col2 = st.columns([3, 1])
         
         with col1:
-            search_query = st.text_input(
-                "Consulta de búsqueda:",
-                value="site:mitiendanube.com moda mujer",
-                help="Usa 'site:mitiendanube.com' seguido de palabras clave"
+            target_domain = st.text_input(
+                "Dominio objetivo:",
+                value="mitiendanube.com",
+                help="Se utilizará en el operador site:. Ej: mitiendanube.com o shopify.com",
+                key="dominio_objetivo"
             )
-        
         with col2:
-            num_results = st.number_input(
-                "Cantidad de URLs:",
-                min_value=5,
-                max_value=100,
-                value=20,
-                step=5
+            country_filter = st.selectbox(
+                "País objetivo:",
+                list(COUNTRY_FILTERS.keys()),
+                key="pais_objetivo",
+                help="Se agrega como palabra clave para enfocar la búsqueda"
             )
         
-        st.markdown("**💡 Ejemplos de búsqueda:**")
-        ejemplos = st.expander("Ver ejemplos")
-        with ejemplos:
-            st.code("site:mitiendanube.com moda mujer")
-            st.code("site:mitiendanube.com joyería artesanal")
-            st.code("site:mitiendanube.com maquillaje belleza")
-            st.code("site:mitiendanube.com accesorios colombia")
+        col3, col4 = st.columns([1.5, 1])
+        with col3:
+            search_profile = st.selectbox(
+                "Tipo de búsqueda:",
+                list(SEARCH_PROFILES.keys()),
+                key="perfil_busqueda",
+                help="Selecciona el tipo de negocio a investigar"
+            )
+        with col4:
+            extra_keywords = st.text_input(
+                "Palabras adicionales:",
+                key="palabras_adicionales",
+                placeholder="vegano, mayorista, premium...",
+                help="Puedes separar varias frases con comas"
+            )
+        
+        custom_query = st.text_input(
+            "Consulta personalizada (opcional):",
+            key="consulta_personalizada",
+            help="Si lo completas se usará tal cual y se ignorará la configuración anterior"
+        )
+        
+        num_results = st.number_input(
+            "Cantidad de URLs:",
+            min_value=5,
+            max_value=100,
+            value=20,
+            step=5
+        )
+        
+        search_query, normalized_domain = build_search_query(
+            target_domain,
+            search_profile,
+            country_filter,
+            extra_keywords,
+            custom_query
+        )
+        
+        st.caption("Consulta generada")
+        st.code(search_query)
+        st.markdown("Ajusta los selectores para crear búsquedas generales o enfocadas sin limitarte a moda ni a un solo país.")
         
         if st.button("🔎 Buscar URLs", type="primary"):
-            if not search_query:
-                st.error("❌ Ingresa una consulta de búsqueda")
-            elif api_service != "DuckDuckGo (Gratis, limitado)" and not api_key:
+            if api_service != "DuckDuckGo (Gratis, limitado)" and not api_key:
                 st.error("❌ Ingresa tu API Key")
             else:
                 with st.spinner(f"🔍 Buscando URLs con {api_service}..."):
@@ -373,21 +468,21 @@ def main():
                     
                     # Seleccionar método de búsqueda
                     if api_service == "Serper (Recomendado)":
-                        progress_text.text(f"🔍 Buscando en Google... (puede tardar unos segundos para {num_results} URLs)")
-                        urls, error = searcher.search_with_serper(search_query, num_results, api_key)
+                        progress_text.text(f"🔍 Buscando en Google... (objetivo: {num_results} URLs)")
+                        urls, error = searcher.search_with_serper(search_query, num_results, api_key, normalized_domain)
                     elif api_service == "SerpAPI":
-                        progress_text.text(f"🔍 Buscando en Google... (puede tardar unos segundos para {num_results} URLs)")
-                        urls, error = searcher.search_with_serpapi(search_query, num_results, api_key)
+                        progress_text.text(f"🔍 Buscando en Google... (objetivo: {num_results} URLs)")
+                        urls, error = searcher.search_with_serpapi(search_query, num_results, api_key, normalized_domain)
                     else:
                         progress_text.text("🔍 Buscando con DuckDuckGo...")
-                        urls, error = searcher.search_with_duckduckgo(search_query, num_results)
+                        urls, error = searcher.search_with_duckduckgo(search_query, num_results, normalized_domain)
                     
                     progress_text.empty()
                     
                     if error:
                         st.error(f"❌ {error}")
                     elif urls:
-                        urls_a_procesar = list(set(urls))  # Eliminar duplicados
+                        urls_a_procesar = list(dict.fromkeys(urls))
                         st.success(f"✅ Se encontraron {len(urls_a_procesar)} URLs únicas")
                         
                         # Guardar en session state
@@ -398,7 +493,7 @@ def main():
                             for i, url in enumerate(urls_a_procesar, 1):
                                 st.text(f"{i}. {url}")
                     else:
-                        st.warning("⚠️ No se encontraron URLs con esa búsqueda. Intenta con otras palabras clave.")
+                        st.warning("⚠️ No se encontraron URLs con esa combinación. Prueba con otros perfiles, países o términos.")
         
         # Usar URLs guardadas
         if 'urls_encontradas' in st.session_state:
@@ -407,17 +502,17 @@ def main():
     
     elif modo == "📝 Ingresar URLs manualmente":
         st.markdown("### 📝 Ingresa las URLs")
-        st.markdown("Una URL por línea (ejemplo: `https://tienda.mitiendanube.com`)")
+        st.markdown("Una URL por línea (ejemplo: `https://tienda.tudominio.com`)")
         
         urls_text = st.text_area(
-            "URLs de Tiendanube:",
+            "URLs objetivo:",
             height=200,
-            placeholder="https://beautymakeup.mitiendanube.com\nhttps://modafashion.mitiendanube.com\nhttps://joyasarte.mitiendanube.com"
+            placeholder="https://tienda1.ejemplo.com\nhttps://marca2.mitiendanube.com\nhttps://bazar3.shop"
         )
         
         if urls_text:
             urls_a_procesar = [url.strip() for url in urls_text.split('\n') 
-                             if url.strip() and 'mitiendanube.com' in url]
+                             if url.strip()]
             st.success(f"✅ {len(urls_a_procesar)} URLs detectadas")
     
     elif modo == "📂 Subir archivo .txt":
@@ -427,7 +522,7 @@ def main():
         if uploaded_file:
             contenido = uploaded_file.read().decode('utf-8')
             urls_a_procesar = [url.strip() for url in contenido.split('\n') 
-                             if url.strip() and 'mitiendanube.com' in url]
+                             if url.strip()]
             st.success(f"✅ {len(urls_a_procesar)} URLs cargadas desde archivo")
             
             with st.expander("Ver URLs cargadas"):
