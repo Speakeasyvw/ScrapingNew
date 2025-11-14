@@ -12,6 +12,7 @@ import re
 from datetime import datetime
 import io
 import json
+from urllib.parse import urljoin, urlparse
 
 # Configuración de página
 st.set_page_config(
@@ -270,6 +271,7 @@ class TiendaNubeScraper:
             whatsapp = self._extraer_whatsapp(soup, texto)
             facebook = self._extraer_facebook(soup)
             nicho = self._clasificar_nicho(nombre + ' ' + descripcion)
+            productos = self.extraer_productos_precio(url, soup=soup)
             
             return {
                 'url': url,
@@ -280,6 +282,8 @@ class TiendaNubeScraper:
                 'facebook': facebook,
                 'email': email,
                 'whatsapp': whatsapp,
+                'productos': productos[:20],
+                'total_productos': len(productos),
                 'fecha_scraping': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                 'estado': 'Activa'
             }
@@ -287,6 +291,175 @@ class TiendaNubeScraper:
             return None
         finally:
             time.sleep(1.5)
+
+    def extraer_productos_precio(self, url, soup=None, depth=0, max_depth=2, visitados=None, max_products=50):
+        """Intenta extraer productos con nombre, precio, moneda e URL."""
+        productos = []
+        visitados = visitados or set()
+        if depth > max_depth or url in visitados:
+            return productos
+        visitados.add(url)
+        dominio_base = self._obtener_dominio(url)
+        try:
+            current_soup = soup
+            if current_soup is None:
+                response = self.session.get(url, timeout=15)
+                if response.status_code != 200:
+                    return productos
+                current_soup = BeautifulSoup(response.text, 'html.parser')
+            productos.extend(self._extraer_productos_jsonld(current_soup, url))
+            if len(productos) < max_products:
+                productos.extend(self._extraer_productos_html(current_soup, url))
+            productos = self._deduplicar_productos(productos)
+            if len(productos) >= max_products:
+                return productos[:max_products]
+            if len(productos) < max_products and depth < max_depth:
+                patrones = ('/productos', '/product', '/products', '/collection', '/collections',
+                            '/catalogo', '/categoria', '/shop', '/tienda')
+                for link in current_soup.find_all('a', href=True):
+                    href = link['href']
+                    if not any(x in href.lower() for x in patrones):
+                        continue
+                    sub_url = urljoin(url, href)
+                    if self._obtener_dominio(sub_url) != dominio_base:
+                        continue
+                    if sub_url in visitados:
+                        continue
+                        nuevos = self.extraer_productos_precio(
+                            sub_url,
+                            soup=None,
+                            depth=depth + 1,
+                            max_depth=max_depth,
+                            visitados=visitados,
+                            max_products=max_products
+                        )
+                        if nuevos:
+                            productos.extend(nuevos)
+                            if len(productos) >= max_products:
+                                break
+            productos = self._deduplicar_productos(productos)
+        except Exception:
+            return productos
+        return productos[:max_products]
+
+    def _deduplicar_productos(self, productos):
+        vistos = set()
+        deduplicados = []
+        for prod in productos:
+            key = (prod.get('nombre_producto'), prod.get('url_producto'))
+            if key in vistos:
+                continue
+            vistos.add(key)
+            deduplicados.append(prod)
+        return deduplicados
+
+    def _limpiar_texto(self, texto):
+        if not texto:
+            return ''
+        return re.sub(r'\s+', ' ', texto).strip()
+
+    def _obtener_dominio(self, url):
+        try:
+            return urlparse(url).netloc
+        except Exception:
+            return ''
+
+    def _normalizar_url(self, enlace, base_url):
+        if not enlace:
+            return base_url
+        absoluta = urljoin(base_url, enlace)
+        absoluta = absoluta.split('#')[0]
+        return absoluta
+
+    def _extraer_productos_jsonld(self, soup, base_url):
+        productos = []
+        for script in soup.find_all('script', type='application/ld+json'):
+            contenido = script.string
+            if not contenido:
+                continue
+            try:
+                data = json.loads(contenido.strip())
+            except Exception:
+                continue
+            entradas = data if isinstance(data, list) else [data]
+            for entrada in entradas:
+                producto = self._producto_desde_jsonld(entrada, base_url)
+                if producto:
+                    productos.append(producto)
+        return productos
+
+    def _producto_desde_jsonld(self, entrada, base_url):
+        if not isinstance(entrada, dict):
+            return None
+        tipos = entrada.get('@type')
+        if isinstance(tipos, str):
+            tipos = [tipos]
+        if not tipos or all('product' not in t.lower() for t in tipos if isinstance(t, str)):
+            return None
+        nombre = self._limpiar_texto(entrada.get('name'))
+        if not nombre:
+            return None
+        offers = entrada.get('offers') or {}
+        if isinstance(offers, list):
+            offers = offers[0] if offers else {}
+        precio = offers.get('price') or entrada.get('price', '')
+        moneda = offers.get('priceCurrency') or entrada.get('priceCurrency', '')
+        url_producto = entrada.get('url') or offers.get('url') or base_url
+        url_producto = self._normalizar_url(url_producto, base_url)
+        imagen = entrada.get('image')
+        if isinstance(imagen, list):
+            imagen = imagen[0]
+        return {
+            'nombre_producto': nombre,
+            'precio': self._limpiar_texto(precio),
+            'moneda': moneda,
+            'url_producto': url_producto,
+            'imagen': imagen
+        }
+
+    def _extraer_productos_html(self, soup, base_url):
+        productos = []
+        dominio_base = self._obtener_dominio(base_url)
+        contenedores = soup.find_all(
+            ['article', 'div', 'li'],
+            class_=re.compile(r'product|producto|card|item|grid', re.I)
+        )
+        for item in contenedores:
+            nombre_tag = item.find(['h2', 'h3', 'h4', 'a', 'p'])
+            nombre = self._limpiar_texto(nombre_tag.get_text()) if nombre_tag else ''
+            precio = ''
+            moneda = ''
+            precio_tag = item.find(['span', 'div', 'p'], class_=re.compile(r'price|precio|amount', re.I))
+            tiene_precio = False
+            if precio_tag:
+                precio_texto = self._limpiar_texto(precio_tag.get_text())
+                precio = precio_texto
+                moneda_match = re.search(r'([$€S/]|ARS|USD|MXN|CLP)', precio_texto, re.I)
+                if moneda_match:
+                    moneda = moneda_match.group(0)
+                if re.search(r'\d', precio_texto):
+                    tiene_precio = True
+            elif item.has_attr('data-price'):
+                precio = item['data-price']
+                if re.search(r'\d', str(precio)):
+                    tiene_precio = True
+            link_tag = item.find('a', href=True)
+            url_producto = self._normalizar_url(link_tag['href'], base_url) if link_tag else base_url
+            if self._obtener_dominio(url_producto) and self._obtener_dominio(url_producto) != dominio_base:
+                continue
+            if not tiene_precio:
+                continue
+            if nombre and precio:
+                productos.append({
+                    'nombre_producto': nombre,
+                    'precio': precio,
+                    'moneda': moneda,
+                    'url_producto': url_producto,
+                    'imagen': None
+                })
+            if len(productos) >= 50:
+                break
+        return productos
     
     def _extraer_instagram(self, soup, texto):
         for link in soup.find_all('a', href=True):
@@ -570,11 +743,12 @@ def main():
                         resultados.append(resultado)
                         
                         with results_container:
-                            cols = st.columns([3, 1, 1, 1])
+                            cols = st.columns([3, 1, 1, 1, 1])
                             cols[0].text(f"✅ {resultado['nombre_tienda'][:30]}")
                             cols[1].text("✓" if resultado['instagram'] else "✗")
                             cols[2].text("✓" if resultado['email'] else "✗")
                             cols[3].text("✓" if resultado['whatsapp'] else "✗")
+                            cols[4].text(f"{resultado.get('total_productos', 0)} prod")
                     
                     progress_bar.progress((i + 1) / len(urls_a_procesar))
                 
@@ -582,6 +756,8 @@ def main():
                 
                 if resultados:
                     df = pd.DataFrame(resultados)
+                    df['productos'] = df['productos'].apply(lambda x: x if isinstance(x, list) else [])
+                    df['total_productos'] = df['total_productos'].fillna(0).astype(int)
                     
                     # Calcular score
                     df['score_contacto'] = (
@@ -595,6 +771,7 @@ def main():
                     
                     # Guardar en session state
                     st.session_state['df_resultados'] = df
+                    st.session_state['resultados_raw'] = resultados
                     st.session_state['scraping_done'] = True
                     
                     st.rerun()
@@ -607,11 +784,12 @@ def main():
         st.markdown("## 📊 Resultados")
         
         # Métricas
-        col1, col2, col3, col4 = st.columns(4)
+        col1, col2, col3, col4, col5 = st.columns(5)
         col1.metric("Total Tiendas", len(df))
         col2.metric("Con Instagram", df['instagram'].notna().sum())
         col3.metric("Con Email", df['email'].notna().sum())
         col4.metric("Con WhatsApp", df['whatsapp'].notna().sum())
+        col5.metric("Productos detectados", int(df['total_productos'].sum()))
         
         # Gráficos
         col1, col2 = st.columns(2)
@@ -647,10 +825,27 @@ def main():
         
         st.dataframe(
             df_filtered[['nombre_tienda', 'nicho', 'instagram', 'email', 
-                        'whatsapp', 'score_contacto']],
+                        'whatsapp', 'score_contacto', 'total_productos']],
             use_container_width=True,
             height=400
         )
+        
+        st.markdown("### Productos detectados por tienda")
+        if df_filtered.empty:
+            st.info("Ajusta los filtros para ver los productos detectados.")
+        else:
+            opciones_tienda = df_filtered['nombre_tienda'].tolist()
+            tienda_seleccionada = st.selectbox(
+                "Selecciona una tienda para ver sus productos:",
+                options=opciones_tienda,
+                key="productos_selectbox"
+            )
+            productos_tienda = df_filtered[df_filtered['nombre_tienda'] == tienda_seleccionada]['productos'].iloc[0]
+            productos_tienda = productos_tienda if isinstance(productos_tienda, list) else []
+            if productos_tienda:
+                st.table(pd.DataFrame(productos_tienda))
+            else:
+                st.info("No se detectaron productos en la tienda seleccionada.")
         
         # Descargas
         st.markdown("### 📥 Descargar Resultados")
@@ -677,6 +872,16 @@ def main():
             )
         
         with col3:
+            resultados_raw = st.session_state.get('resultados_raw', [])
+            if resultados_raw:
+                json_buffer = io.StringIO()
+                json.dump(resultados_raw, json_buffer, ensure_ascii=False, indent=2)
+                st.download_button(
+                    label="🗂️ JSON completo",
+                    data=json_buffer.getvalue(),
+                    file_name=f"tiendas_productos_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+                    mime="application/json"
+                )
             if st.button("🔄 Nuevo Scraping"):
                 st.session_state['scraping_done'] = False
                 st.rerun()
