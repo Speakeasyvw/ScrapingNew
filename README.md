@@ -90,15 +90,17 @@ pip install -r requirements.txt
 # Ejecutar app
 streamlit run app.py
 La app se abrirá automáticamente en http://localhost:8501
+```
 
 📁 Estructura del Proyecto
+```
 scraper-tiendanube/
 ├── app.py                 # Aplicación principal Streamlit
 ├── requirements.txt       # Dependencias Python
 ├── README.md              # Esta documentación
 ├── .gitignore             # Archivos ignorados por Git
 └── LICENSE                # Licencia MIT
-
+```
 
 🛠️ Tecnologías Utilizadas
 
@@ -187,14 +189,18 @@ Tienda sin contactos = 0 puntos (descartada)
 Tienes 3 opciones:
 
 A) Ingresar manualmente
+```
 https://beautymakeup.mitiendanube.com
 https://modafashion.mitiendanube.com
 https://joyasarte.mitiendanube.com
+```
 B) Crear archivo .txt
 # urls_input.txt
+```
 https://tienda1.mitiendanube.com
 https://tienda2.mitiendanube.com
 https://tienda3.mitiendanube.com
+```
 
 C) Usar URLs de prueba
 
@@ -265,18 +271,26 @@ Ajustar Velocidad de Scraping
 
 Edita app.py línea 48:
 # Más lento pero más seguro (menos riesgo de bloqueo)
+```
 time.sleep(2.0)
+```
 
 # Más rápido pero mayor riesgo
+```
 time.sleep(0.8)
+```
 
 # Balance recomendado
+```
 time.sleep(1.5)  # Default
+```
 
 Cambiar Timeout de Requests
 
 Línea 35:
+```
 response = self.session.get(url, timeout=15)  # 15 segundos
+```
 
 🚨 Limitaciones y Consideraciones
 Técnicas
@@ -464,7 +478,8 @@ Para nuevos usuarios:
 
  URL personalizada configurada
 
- README personalizado con tu info
+ README
+ ```
 
 🚀 Deploy Rápido
 # 1 minuto setup
@@ -472,7 +487,7 @@ git clone https://github.com/Speakeasyvw/ScrapingNew.git
 cd ScrapingNew
 pip install -r requirements.txt
 streamlit run app.py
-
+```
 # Deploy en cloud: https://share.streamlit.io
 # Connect GitHub → Select repo → Deploy!
 
@@ -511,6 +526,7 @@ Hecho con ❤️ para la comunidad de e-commerce
 
 ⭐ Si te fue útil, deja una estrella en el repo
 
-</div> ```
+</div> 
 
 Si después ves algún otro símbolo raro al pegarlo en GitHub, probablemente sea tema de codificación del archivo (guardalo como UTF-8 en tu editor y estás).
+
