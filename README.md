@@ -1,23 +1,33 @@
-# 🚀 Scraper de Tiendanube - Focus Group Recruiter
+# ?? Scraper de Tiendas Online - Focus Group Recruiter
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://TU-USUARIO-scraper-tiendanube.streamlit.app)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Sistema automatizado para identificar y extraer datos de contacto de emprendedoras de Tiendanube en los sectores de **moda y belleza** para reclutamiento de focus groups.
+Plataforma automatizada para identificar y extraer datos de contacto de tiendas online usando b?squedas configurables por dominio, pa?s y tipo de negocio. Ideal para reclutamiento de focus groups, investigaci?n y outreach sin limitarte a Tiendanube ni a un nicho espec?fico.
 
 ---
 
-## 🎯 ¿Qué hace esta herramienta?
+## ?? ?Qu? hace esta herramienta?
 
-Esta aplicación web permite:
+Esta aplicaci?n web permite:
 
-- ✅ **Extraer automáticamente** datos de contacto de tiendas Tiendanube
-- ✅ **Encontrar** Instagram, Email, WhatsApp y Facebook
-- ✅ **Clasificar** tiendas por nicho (Belleza, Moda, Joyería, etc.)
-- ✅ **Priorizar** contactos por calidad de datos (scoring automático)
-- ✅ **Exportar** CSVs listos para campañas de outreach
-- ✅ **Visualizar** estadísticas y métricas en tiempo real
+- ? **Construir b?squedas autom?ticas** con operador `site:` usando tu dominio objetivo, pa?s y tipo de negocio
+- ? **Extraer autom?ticamente** datos de contacto de las URLs encontradas
+- ? **Encontrar** Instagram, Email, WhatsApp y Facebook
+- ? **Clasificar** tiendas por nicho e inter?s (moda, belleza, hogar, tecnolog?a, etc.)
+- ? **Priorizar** contactos por calidad de datos (scoring autom?tico)
+- ? **Exportar** CSVs listos para campa?as de outreach
+- ? **Visualizar** estad?sticas y m?tricas en tiempo real
+
+---
+
+## ?? Modos de b?squeda
+
+1. **?? Buscar URLs en Google:** selecciona dominio (ej. `mitiendanube.com` o `shopify.com`), pa?s, perfil de negocio y palabras clave adicionales para generar la consulta. Compatible con Serper, SerpAPI o DuckDuckGo.
+2. **?? Ingresar URLs manualmente:** pega cualquier listado de URLs que ya tengas identificado.
+3. **?? Subir archivo `.txt`:** importa un archivo con una URL por l?nea para procesar lotes grandes.
+4. **?? Usar URLs de prueba:** ideal para demos o tests r?pidos.
 
 ---
 
@@ -45,24 +55,30 @@ Esta aplicación web permite:
 
 ---
 
-## 🚀 Uso Rápido
+## ?? Uso R?pido
 
-### Opción 1: Usar la App Online (Recomendado)
+### Opci?n 1: Buscar URLs en Google (autom?tico)
 
-1. **Abre el link:** https://scrapingnew.streamlit.app/
-2. **Selecciona el modo:**
-   - 📝 Ingresar URLs manualmente
-   - 📂 Subir archivo .txt
-   - 🧪 Usar URLs de prueba (para testing)
-3. **Inicia el scraping:** Click en "🚀 Iniciar Scraping"
-4. **Descarga resultados:** Los CSVs se generan automáticamente
+1. **Abre la app:** https://scrapingnew.streamlit.app/
+2. **Elige ??? Buscar URLs en Google? en la barra lateral.**
+3. **Configura la b?squeda:** dominio objetivo, pa?s, tipo de negocio y palabras clave extra (o usa tu consulta personalizada).
+4. **Selecciona el servicio:** Serper, SerpAPI o DuckDuckGo.
+5. **Haz clic en ??? Buscar URLs? y luego en ??? Iniciar Scraping?.**
+6. **Descarga tus CSVs:** completo y Top 50 ordenados por score.
 
-⏱️ **Tiempo estimado:**
+?? **Tiempo estimado:**
 - 10 tiendas: ~2 minutos
 - 50 tiendas: ~10 minutos
 - 100 tiendas: ~20 minutos
 
-### Opción 2: Ejecutar Localmente
+### Opci?n 2: Ingresar o importar URLs existentes
+
+1. Selecciona ??? Ingresar URLs manualmente? o ??? Subir archivo .txt?.
+2. Pega/importe tus URLs (una por l?nea).
+3. Presiona ??? Iniciar Scraping? y espera la barra de progreso.
+4. Descarga los CSVs generados autom?ticamente.
+
+### Opci?n 3: Ejecutar Localmente
 
 ```bash
 # Clonar repositorio
@@ -76,7 +92,7 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-La app se abrirá automáticamente en `http://localhost:8501`
+La app se abrir? autom?ticamente en `http://localhost:8501`
 
 ---
 
@@ -103,6 +119,12 @@ scraper-tiendanube/
 ---
 
 ## 📋 Características
+
+### ?? Búsquedas configurables
+- Dominio personalizable usando `site:`
+- Filtros rápidos por país y perfil/nicho
+- Palabras clave adicionales o consulta manual
+- Compatible con Serper, SerpAPI y DuckDuckGo
 
 ### ✨ Extracción de Datos
 - Nombre de la tienda
